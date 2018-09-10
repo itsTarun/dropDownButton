@@ -13,12 +13,16 @@ class ViewController: UIViewController {
 
     var button = dropDownButton()
     
+    var buttonTitle = "WeeklyTime"
+    var buttonWidth : CGFloat = 120
+    var buttonHeight: CGFloat = 50
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         button = dropDownButton.init(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
-        button.setTitle("Colors", for: .normal)
+        button.setTitle(buttonTitle, for: .normal)
         
         button.translatesAutoresizingMaskIntoConstraints = false
         
@@ -27,8 +31,8 @@ class ViewController: UIViewController {
         button.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         button.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
         
-        button.widthAnchor.constraint(equalToConstant: 150).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        button.widthAnchor.constraint(equalToConstant: buttonWidth).isActive = true
+        button.heightAnchor.constraint(equalToConstant: buttonHeight).isActive = true
         
         
         button.dropView.dropDownOptions = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -43,7 +47,6 @@ class ViewController: UIViewController {
 }
 
 
-
 // custom delegate
 protocol DropDownProtocol {
     func dropDownPressed(string : String)
@@ -52,6 +55,7 @@ protocol DropDownProtocol {
 class dropDownButton: UIButton, DropDownProtocol {
     func dropDownPressed(string: String) {
         self.setTitle(string, for: .normal)
+        self.dismissDropDown()
     }
     
     
@@ -83,6 +87,8 @@ class dropDownButton: UIButton, DropDownProtocol {
         height = dropView.heightAnchor.constraint(equalToConstant: 0)
     }
     
+
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -109,20 +115,23 @@ class dropDownButton: UIButton, DropDownProtocol {
             }, completion: nil)
             
         }else {
-            isOpen = false
-            NSLayoutConstraint.deactivate([self.height])
-            // button height
-            self.height.constant = 0
-            NSLayoutConstraint.activate([self.height])
-            
-            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseInOut, animations: {
-                self.dropView.center.y -= self.dropView.frame.height / 2
-                self.dropView.layoutIfNeeded()
-                
-            }, completion: nil)
+            self.dismissDropDown()
         }
     }
     
+    fileprivate func dismissDropDown() {
+        isOpen = false
+        NSLayoutConstraint.deactivate([self.height])
+        // button height
+        self.height.constant = 0
+        NSLayoutConstraint.activate([self.height])
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseInOut, animations: {
+            self.dropView.center.y -= self.dropView.frame.height / 2
+            self.dropView.layoutIfNeeded()
+            
+        }, completion: nil)
+    }
     
 }
 
@@ -171,6 +180,8 @@ class dropDownView : UIView, UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.delegate.dropDownPressed(string: dropDownOptions[indexPath.row])
+        
+        self.tableView.deselectRow(at: indexPath, animated: true)
     }
     
 }
